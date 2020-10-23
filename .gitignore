@@ -29,6 +29,7 @@ webpack.dev.config.js
 .DS_Store
 .cache-loader
 node_modules
+*/**/.cache/*
 dist
 
 # local env files
