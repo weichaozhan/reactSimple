@@ -1,3 +1,5 @@
+import { Component } from './react';
+
 function setAttributes(dom, attrName, attrValue) {
   let name = attrName;
   
@@ -27,11 +29,69 @@ function setAttributes(dom, attrName, attrValue) {
   }
 }
 
-function render(vnode, container) {
+function createComponent(cmfunc, props) {
+  let inst;
+
+  if (cmfunc.prototype?.render) {
+    inst = new cmfunc(props);
+  } else {
+    inst = new Component(props);
+    // inst.constructor = cmfunc;
+    inst.render = function() {
+      // return this.constructor(props);
+      return cmfunc(props);
+    };
+  }
+  console.log('inst', inst.render());
+  return inst;
+}
+
+export function setComponentProps(component, props) {
+  if (!component.base) {
+    component.componentWillMount?.();
+  } else {
+    component.componentWillReceiveProps(props);
+  }
+
+  component.props = props;
+
+  renderComponent(component);
+}
+
+export function renderComponent(component) {
+  let base;
+  const renderer = component.render();
+
+  if (component.base && component.componentWillUpdate) {
+    component.componentWillUpdate();
+  }
+
+  base = _render(renderer);
+
+  if (!component.base) {
+    component.componentDidMount?.();
+  } else {
+    component.componentDidUpdate?.();
+  }
+
+  component?.base?.parentNode?.replaceChild?.(base, component.base)
+
+  component.base = base;
+  base._component = component;
+}
+
+function _render(vnode) {
   if (typeof vnode !== 'object' || vnode === null) {
     const textNode = document.createTextNode(vnode);
-    container.appendChild(textNode);
     return textNode;
+  }
+
+  if (typeof vnode.tag === 'function') {
+    const component = createComponent(vnode.tag, vnode.attrs);
+
+    setComponentProps(component, vnode.attrs);
+
+    return component.base;
   }
 
   const dom = document.createElement(vnode?.tag);
@@ -46,15 +106,20 @@ function render(vnode, container) {
   vnode?.children?.forEach(child => {
     render(child, dom);
   });
+  
+  return dom;
+}
 
-  container.appendChild(dom);
-  return container;
+const render = (vnode, container) => {
+  const dom = _render(vnode);
+  
+  return container.appendChild(dom);
 }
 
 export default {
   render: (vnode, container) => {
     container.innerHTML = '';
-    
+
     return render(vnode, container);
   }
 };
