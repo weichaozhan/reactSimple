@@ -1,6 +1,6 @@
 import { Component } from './react';
 
-function setAttributes(dom, attrName, attrValue) {
+export function setAttributes(dom, attrName, attrValue) {
   let name = attrName;
   
   if (attrName === 'className') {
@@ -42,7 +42,7 @@ function createComponent(cmfunc, props) {
       return cmfunc(props);
     };
   }
-  console.log('inst', inst.render());
+
   return inst;
 }
 

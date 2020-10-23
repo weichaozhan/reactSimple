@@ -6,7 +6,6 @@ class Counter extends React.Component {
     this.state = {
       count: 0
     };
-    console.log('count', this.state);
   }
   
   render() {
