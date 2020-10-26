@@ -1,4 +1,5 @@
 import { Component } from './react';
+import { diff } from './diff';
 
 export function setAttributes(dom, attrName, attrValue) {
   let name = attrName;
@@ -29,7 +30,7 @@ export function setAttributes(dom, attrName, attrValue) {
   }
 }
 
-function createComponent(cmfunc, props) {
+export function createComponent(cmfunc, props) {
   let inst;
 
   if (cmfunc.prototype?.render) {
@@ -66,7 +67,8 @@ export function renderComponent(component) {
     component.componentWillUpdate();
   }
 
-  base = _render(renderer);
+  // base = _render(renderer);
+  base = diff(component.base, renderer);
 
   if (!component.base) {
     component.componentDidMount?.();
@@ -74,10 +76,10 @@ export function renderComponent(component) {
     component.componentDidUpdate?.();
   }
 
-  component?.base?.parentNode?.replaceChild?.(base, component.base)
+  // component?.base?.parentNode?.replaceChild?.(base, component.base)
 
   component.base = base;
-  base._component = component;
+  base && (base._component = component);
 }
 
 function _render(vnode) {
